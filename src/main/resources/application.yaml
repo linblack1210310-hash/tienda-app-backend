@@ -14,7 +14,7 @@ spring:
     show-sql: true
 
 server:
-  port: 9090
+  port: ${PORT:9090}
   servlet:
     context-path: /api/v1/tienda
 
