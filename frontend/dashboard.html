@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>TiendaApp - Dashboard</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container" style="max-width: 600px;">
+        <h2>Bienvenido, <span id="username">Usuario</span></h2>
+        <p style="text-align: center; margin-bottom: 1rem;">Catálogo de Productos</p>
+        
+        <div id="products" style="margin-bottom: 1rem;">
+            <p style="text-align: center;">Cargando productos...</p>
+        </div>
+        
+        <button onclick="logout()" style="background: #dc3545;">Cerrar Sesión</button>
+    </div>
+
+    <script>
+        const API_URL = 'https://tienda-app-backend-habm.onrender.com/api/v1/tienda';
+        const token = localStorage.getItem('token');
+        const username = localStorage.getItem('username');
+
+        if (!token) {
+            window.location.href = 'index.html';
+        }
+
+        document.getElementById('username').textContent = username || 'Usuario';
+
+        // Cargar productos
+        async function loadProducts() {
+            try {
+                const response = await fetch(`${API_URL}/products`, {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+                const data = await response.json();
+                const container = document.getElementById('products');
+
+                if (data.data && data.data.length > 0) {
+                    container.innerHTML = data.data.map(p => `
+                        <div style="border: 1px solid #ddd; padding: 10px; border-radius: 5px; margin-bottom: 10px;">
+                            <strong>${p.name}</strong> - $${p.price} (Stock: ${p.stock})
+                            <p style="font-size: 0.8rem; color: #666;">${p.description || ''}</p>
+                        </div>
+                    `).join('');
+                } else {
+                    container.innerHTML = '<p style="text-align: center; color: #666;">No hay productos disponibles.</p>';
+                }
+            } catch (error) {
+                console.error('Error al cargar productos:', error);
+                document.getElementById('products').innerHTML = '<p style="text-align: center; color: red;">Error al cargar productos.</p>';
+            }
+        }
+
+        function logout() {
+            localStorage.removeItem('token');
+            localStorage.removeItem('username');
+            window.location.href = 'index.html';
+        }
+
+        loadProducts();
+    </script>
+</body>
+</html>
